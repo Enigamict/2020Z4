@@ -28,7 +28,7 @@ static void parse(const void* ptr, size_t len)
 	return;
 }
 
-static void adddel_route(int fd, const char *dststr, const char *tablestr, uint32_t oif, bool is_add)
+static void adddel_route(int fd, const char *dststr, int plen, const char *nexthopstr, uint32_t oif, bool is_add)
 {
 	struct {
 		struct nlmsghdr n;
@@ -36,10 +36,10 @@ static void adddel_route(int fd, const char *dststr, const char *tablestr, uint3
 		char buf[4096];
 	} req = {
 		.n.nlmsg_len = NLMSG_LENGTH(sizeof(struct rtmsg)),
-		.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_EXCL | NLM_F_ACK,
+		.n.nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_ACK | NLM_F_REPLACE,
 		.n.nlmsg_type = is_add ? RTM_NEWROUTE : RTM_DELROUTE,
 		.r.rtm_family = AF_INET,
-		.r.rtm_dst_len = 32,
+		.r.rtm_dst_len = plen,
 		.r.rtm_src_len = 0,
 		.r.rtm_tos = 0,
 		.r.rtm_table = RT_TABLE_MAIN,
@@ -55,20 +55,19 @@ static void adddel_route(int fd, const char *dststr, const char *tablestr, uint3
 	addattr_l(&req.n, sizeof(req), RTA_DST, &prefix, sizeof(struct in_addr));
 
 	/* set RTA_GATEWAY */
-	//struct in_addr gw;
-	//inet_pton(AF_INET, gwstr, &gw);
-	//addattr_l(&req.n, sizeof(req),
-	//	  RTA_GATEWAY, &gw,
-	//	  sizeof(struct in_addr));
+	struct in_addr gw;
+	inet_pton(AF_INET, nexthopstr, &gw);
+	addattr_l(&req.n, sizeof(req),
+		  RTA_GATEWAY, &gw,
+		  sizeof(struct in_addr));
 
 	/* set RTA_OIF */
 	uint32_t oif_idx = oif;
 	addattr32(&req.n, sizeof(req), RTA_OIF, oif_idx);
 
 	/* set RTA_TABLE */
-	struct in_addr table;
-	inet_pton(AF_INET, tablestr, &table);
-	addattr_l(&req.n, sizeof(req), RTA_TABLE, &table, sizeof(struct in_addr));
+	uint32_t table = 254;
+	addattr32(&req.n, sizeof(req), RTA_TABLE, table);
 
 	/* submit request */
 	char buf[10000];
@@ -84,12 +83,7 @@ static void adddel_route(int fd, const char *dststr, const char *tablestr, uint3
 int main(int argc, char** argv)
 {
 	int fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-	if (!strcmp(argv[1], "ip_route_add")) {
-		adddel_route(fd, argv[3], argv[2], 2, true);
-	}
-	else if (!strcmp(argv[1], "ip_route_del")) {
-		adddel_route(fd, argv[3], argv[2], 2, false);
-	}
+	adddel_route(fd, "10.9.0.0", 24,"10.0.2.3", 2, true);
 	
 	close(fd);
 }

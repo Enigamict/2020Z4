@@ -69,10 +69,8 @@ static void parse(const void* ptr, size_t len)
 		}
 
 		if (tb[RTA_TABLE]) {
-			char str[256];
 			uint32_t val = rta_getattr_u32(tb[RTA_TABLE]);
-			inet_ntop(AF_INET, &val, str, sizeof(str));
-			printf("RTA_TABLE %s\n", str);
+			printf("RTA_TABLE %u\n", val);
 			tb[RTA_TABLE] = NULL;
 		}
 
