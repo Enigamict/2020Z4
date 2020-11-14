@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <jansson.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 // 実行時  -ljansson が必要 janssonがインストールされてない場合 sudo apt-get install libjansson-dev
 
@@ -30,11 +31,31 @@ int main(int argc, char** argv)
         	printf("NULL\n");
         	return 1;
     	}
+	json_t* read_json_ob_neighbors;
+    	read_json_ob_neighbors = json_object_get(
+		read_json_ob, "neighbors");
+    	if (read_json_ob_neighbors == NULL) {
+        	printf("NULL \n");
+        	return 0;;
+    	}
 
-	strcpy(ipadress, json_string_value(json_object_get(read_json_ob, "adress")));
+    	int index;
+    	json_t *read_json_ob_ipadress;
+    	json_array_foreach(read_json_ob_neighbors, 
+		index, read_json_ob_ipadress) {
+
+    		stpcpy(ipadress, json_string_value(
+			json_object_get(read_json_ob_ipadress, 
+			"address")));
+    		printf("%s \n", ipadress);
+    	};
+	
+	struct in_addr a;
+	inet_pton(AF_INET, ipadress, &a);
+	
         addr.sin_family = AF_INET;
         addr.sin_port = htons(12345);
-        addr.sin_addr.s_addr = INADDR_ANY;
+        addr.sin_addr.s_addr = a.s_addr;
         bind(sock0, (struct sockaddr*) &addr, sizeof(addr));
         listen(sock0, 1);
 	int len = sizeof(client);

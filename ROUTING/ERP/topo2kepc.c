@@ -34,8 +34,27 @@ int main(int argc, char** argv)
         	printf("NULL\n");
         	return 1;
    	 }
-	strcpy(ipadress, json_string_value(json_object_get(read_json_ob, "adress")));
+	printf("read done\n");
+	json_t* read_json_ob_neighbors;
+    	read_json_ob_neighbors = json_object_get(
+		read_json_ob, "neighbors");
+    	if (read_json_ob_neighbors == NULL) {
+        	printf("NULL \n");
+        	return 0;;
+    	}
 
+    	int index;
+    	json_t *read_json_ob_ipadress;
+    	json_array_foreach(read_json_ob_neighbors, 
+		index, read_json_ob_ipadress) {
+
+    		stpcpy(ipadress, json_string_value(
+			json_object_get(read_json_ob_ipadress, 
+			"address")));
+    		printf("%s \n", ipadress);
+    	};
+	
+	printf("parse done \n");
 	 /* 接続先指定用構造体の準備 */
 	server.sin_family = AF_INET;
 	server.sin_port = htons(12345);
