@@ -43,41 +43,22 @@ config_parse(struct config* cfg, char* json)
             &cfg->router_id);
   inet_ntop(AF_INET, &cfg->router_id, addr_str ,256);
   printf("router-id: %s\n", addr_str);
-
-  for (int i = 0; i < MAX_NEIGH; i++) {
-    if (!cfg->networks[i])
-      continue;
-        json_t* read_json_ob_neighbors;
-    	read_json_ob_neighbors = json_object_get(
-		read_json_ob, "neighbors");
-    	if (read_json_ob_neighbors == NULL) {
-        	printf("NULL \n");
-    	}
-
-    	int index;
-    	json_t *read_json_ob_ipadress;
-    	json_array_foreach(read_json_ob_neighbors, 
-	       index, read_json_ob_ipadress) {
-
-    		stpcpy(addr_str, json_string_value(
-			json_object_get(read_json_ob_ipadress, 
-			"address")));
-    		printf("%s \n", addr_str);
-    	};
-    inet_ntop(AF_INET, &cfg->neighbors[i]->address, addr_str, 256);
-    printf("test\n");
-    printf("neighbor[%d]: %s\n", i, addr_str);
+  json_t* read_json_ob_neighbors;
+  read_json_ob_neighbors = json_object_get(
+	  read_json_ob, "neighbors");
+  if (read_json_ob_neighbors == NULL) {
+	  printf("NULL \n");
   }
-
-  for (size_t i = 0; i < MAX_NETWORK; i++) {
-    if (!cfg->networks[i])
-      continue;
-    inet_ntop(AF_INET, &cfg->networks[i]->prefix.addr,
-              addr_str, 256);
-    printf("network[%d]: %s\n", i, addr_str,
-           cfg->networks[i]->prefix.length);
+  
+  int index;
+  json_t *read_json_ob_ipadress;
+  json_array_foreach(read_json_ob_neighbors, 
+	 index, read_json_ob_ipadress) {
+	 inet_aton(json_string_value(json_object_get(
+		   read_json_ob_ipadress, "address")),
+		   &cfg->neighbors[index]->address);
+    inet_ntop(AF_INET, &cfg->neighbors[index]->address, addr_str, 256);
+    printf("network[%d]: %s\n", index, addr_str);
   }
 }
 
-//static inline void
-//config_parse()
