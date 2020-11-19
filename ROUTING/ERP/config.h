@@ -7,6 +7,8 @@
 #include <string.h>
 #define MAX_NEIGH 32
 #define MAX_NETWORK 256
+#define MAX_HOP 32
+
 
 struct config {
   struct in_addr router_id;
@@ -26,6 +28,8 @@ struct prefix {
 struct network {
   struct prefix prefix;
 };
+
+
 
 static inline int
 config_parse(struct config* cfg, char* json)
@@ -56,15 +60,15 @@ config_parse(struct config* cfg, char* json)
 
   struct neighbor *ns[MAX_NEIGH];
   int index;
-  char nei_addr[256];
   
   json_t *json_neiaddr;
   json_array_foreach(json_nei, index, json_neiaddr) {
-    strcpy(nei_addr ,json_string_value(
-	   json_object_get(
-	   json_neiaddr, "address")));
-    ns[index] = (struct neighbor *)malloc(sizeof(struct neighbor));
-    inet_pton(AF_INET, nei_addr, &ns[index]->address);
+           ns[index] = (struct neighbor *)malloc(sizeof(
+                        struct neighbor));
+           inet_pton(AF_INET, json_string_value(
+	             json_object_get(
+	             json_neiaddr, "address")), 
+                     &ns[index]->address);
     inet_ntop(AF_INET, &ns[index]->address, addr_str, 256);
     printf("neighbor[%d]: %s\n", index, addr_str);
   }
@@ -77,20 +81,18 @@ config_parse(struct config* cfg, char* json)
     printf("networkの値を取得することができません \n");
     return -1;  
   }
- 
-  int index_pre;
   char *p;
   int lenp;
+  int index_pre;
   char prex_addr_len[256];
-  char prex_addr[256];
   struct prefix *nk[MAX_NETWORK];
   json_t *json_pre;
+  char prex_addr[256];
 
   json_array_foreach(json_net, index_pre, json_pre) {
     strcpy(prex_addr_len, json_string_value(
            json_object_get(json_pre, "prefix")));
     nk[index_pre] = (struct prefix *)malloc(sizeof(struct prefix));
-
     /* ここの時点で文字列はCIDR表記となっているため
        表記の部分から後のアドレスを取り出す */ 
     p = strrchr(prex_addr_len, '/');
