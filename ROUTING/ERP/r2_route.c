@@ -92,7 +92,6 @@ int main()
     msg.networks[index_pre].length = atoi(p + 1);
   }
   struct sockaddr_in addr;
-  struct sockaddr_in client;
   struct sockaddr_in server;
   int sock;
   int sock0;
@@ -130,8 +129,6 @@ int main()
     printf("type =  %s, path =[%s], network = {%s/%d} \n", 
 	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
   }
-  int len = sizeof(client);
-  sock0 = accept(sock, (struct sockaddr *)&client, &len);
 
   msg.type = MSG_TYPE_UPDATE;
 
