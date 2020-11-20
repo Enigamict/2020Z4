@@ -6,7 +6,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #define MAX_HOP 32
-#define MAX_NETWORK 256
+#define MAX_NETWORK 2
 #define MSG_TYPE_UNSPEC 0
 #define MSG_TYPE_UPDATE 1
 #define MSG_TYPE_WITHDRAW 2
@@ -21,9 +21,6 @@ struct message {
   struct prefix networks[MAX_NETWORK];
 };
 
-struct neighbor {
-  struct in_addr address;
-};
 int main() {
   char addr_str[256];
   struct message msg;
@@ -93,6 +90,12 @@ int main() {
   int option = 1;
   int sock0;
   int sock;
+  int i;
+  int n;
+  char buf[10000];
+  char adr_str[256];
+  char net_addr[256];
+  char msgtype[10];
   sock0 = socket(AF_INET, SOCK_STREAM, 0);
   setsockopt(sock0, SOL_SOCKET, SO_REUSEADDR, 
              &option, sizeof(option));
@@ -111,6 +114,23 @@ int main() {
 
   sendto(sock, &msg, sizeof(msg),
              0, (struct sockaddr *)&addr, sizeof(addr));
-
+  
+  memset(buf, 0, sizeof(buf));
+  n = recv(sock, buf, sizeof(buf), 0);
+  if (n < 1) {
+      printf("okasii");
+      return -1;
+  }
+  struct message *msghdr =  (struct message *)buf;
+    for (i = 0; i < MAX_NETWORK; i++){
+    if (msghdr->type == MSG_TYPE_UPDATE) {
+      strcpy(msgtype, "UPDATE");
+    }
+    
+    strcpy(adr_str,inet_ntoa(msghdr->path[0]));
+    strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
+    printf("type =  %s, path =[%s], network = {%s/%d} \n", 
+	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
+ }
   return 0;
 }
