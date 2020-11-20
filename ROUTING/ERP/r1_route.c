@@ -34,13 +34,28 @@ int main() {
     printf("json configが読み取れません\n");
     return -1;
   }
-  inet_pton(AF_INET, json_string_value(json_object_get(
-            read_json_ob, "router-id")), 
-            &msg.path[0]);
+
+  json_t *json_nei;
+  json_nei = json_object_get(
+             read_json_ob, "r1_neighbors");
+  if (json_nei == NULL) {
+    printf("neighborsの値を取得することができません \n");
+    return -1;  
+  }
+
+  int index;
+  json_t *json_neiaddr;
+  json_array_foreach(json_nei, index, json_neiaddr) {
+           inet_pton(AF_INET, json_string_value(
+	             json_object_get(
+	             json_neiaddr, "address")), 
+                     &msg.path[index]);
+  }
+
 
   json_t *json_net;
   json_net = json_object_get(
-             read_json_ob, "networks");
+             read_json_ob, "r1_networks");
   if (json_net == NULL) {
     printf("networkの値を取得することができません \n");
     return -1;
@@ -71,7 +86,7 @@ int main() {
     prex_addr[lenp] = '\0';
 
     inet_pton(AF_INET, prex_addr, &msg.networks[index_pre].addr);
-    msg.networks->length = atoi(p + 1);
+    msg.networks[index_pre].length = atoi(p + 1);
   }
   struct sockaddr_in addr;
   struct sockaddr_in client;
@@ -99,4 +114,3 @@ int main() {
 
   return 0;
 }
-

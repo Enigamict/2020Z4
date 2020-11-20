@@ -9,7 +9,7 @@
 #include <jansson.h>
 #include <string.h>
 #define MAX_HOP 32
-#define MAX_NETWORK 256
+#define MAX_NETWORK 2
 #define MSG_TYPE_UNSPEC 0
 #define MSG_TYPE_UPDATE 1
 #define MSG_TYPE_WITHDRAW 2
@@ -31,8 +31,8 @@ int main()
   struct message msg;
   struct sockaddr_in server;
   int sock;
+  int i;
   int n;
-  int val = 1;
   char buf[10000];
   char adr_str[256];
   char net_addr[256];
@@ -55,16 +55,16 @@ int main()
     return -1;
   }
   struct message *msghdr =  (struct message *)buf;
-  //strcpy(adr_str,inet_ntoa(msghdr->networks[0]->));
-  if (msghdr->type == MSG_TYPE_UPDATE) {
-    strcpy(msgtype, "UPDATE");
-  }
+  for (i = 0; i < MAX_NETWORK; i++){
+    if (msghdr->type == MSG_TYPE_UPDATE) {
+      strcpy(msgtype, "UPDATE");
+    }
 
-  strcpy(adr_str,inet_ntoa(msghdr->path[0]));
-  strcpy(net_addr, inet_ntoa(msghdr->networks[0].addr));
-  printf("type =  %s, path =[%s], network = {%s/%d} ", 
-         msgtype, adr_str, net_addr, msghdr->networks[0].length);
-
+    strcpy(adr_str,inet_ntoa(msghdr->path[0]));
+    strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
+    printf("type =  %s, path =[%s], network = {%s/%d} \n", 
+	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
+ }
   
    /* socketの終了 */
   close(sock);
