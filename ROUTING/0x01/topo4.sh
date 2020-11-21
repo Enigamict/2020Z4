@@ -1,6 +1,5 @@
 # !/bin/bash
-set -eu
-set -x
+set -eux
 
 # Network Namespaceの作成
 sudo ip netns add C1
@@ -18,10 +17,9 @@ sudo ip link add name C2_net0 type veth peer name R1_net2
 
 sudo ip link add name R1_net0 type veth peer name R2_net0
 sudo ip link add name R1_net3 type veth peer name R3_net0
-sudo ip link add name R3_net1 type veth peer name R2_net3
-
 sudo ip link add name R1_net4 type veth peer name R4_net0
 
+sudo ip link add name R3_net1 type veth peer name R2_net3
 sudo ip link add name R4_net1 type veth peer name R2_net4
 
 sudo ip link add name C3_net0 type veth peer  name R2_net1
@@ -111,9 +109,8 @@ sudo ip netns exec C2 ip route add 0.0.0.0/0 via 10.2.0.1
 
 sudo ip netns exec R1 ip route add 10.3.0.0/24 via 10.255.1.2
 sudo ip netns exec R1 ip route add 10.4.0.0/24 via 10.255.1.2
-sudo ip netns exec R1 ip route add 10.255.5.0/24 via 10.255.1.2
-sudo ip netns exec R1 ip route add 10.255.3.0/24 via 10.255.1.2
-
+sudo ip netns exec R1 ip route add 10.255.5.0/24 via 10.255.4.2
+sudo ip netns exec R1 ip route add 10.255.3.0/24 via 10.255.2.2
 
 sudo ip netns exec C3 ip route add 0.0.0.0/0 via 10.3.0.1
 sudo ip netns exec C4 ip route add 0.0.0.0/0 via 10.4.0.1
@@ -125,7 +122,6 @@ sudo ip netns exec R3 ip route add 10.3.0.0/24 via 10.255.3.1
 sudo ip netns exec R3 ip route add 10.4.0.0/24 via 10.255.3.1
 sudo ip netns exec R3 ip route add 10.1.0.0/24 via 10.255.2.1
 sudo ip netns exec R3 ip route add 10.2.0.0/24 via 10.255.2.1
-
 
 sudo ip netns exec R4 ip route add 10.3.0.0/24 via 10.255.5.1
 sudo ip netns exec R4 ip route add 10.4.0.0/24 via 10.255.5.1

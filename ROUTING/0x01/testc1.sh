@@ -20,8 +20,8 @@ ip netns exec C1 ping -c1 10.255.4.1
 ip netns exec C1 ping -c1 10.255.5.2 #
 ip netns exec C1 ping -c1 10.255.5.1 #
 
-ip netns exec C1 ping -c1 10.255.3.1 #
-ip netns exec C1 ping -c1 10.255.3.2 # この4つが帰ってこない
+ip netns exec C1 ping -c1 10.255.3.2 #
+ip netns exec C1 ping -c1 10.255.3.1 # この4つが帰ってこない
 
 # R1 R2
 ip netns exec C1 ping -c1 10.255.1.2
