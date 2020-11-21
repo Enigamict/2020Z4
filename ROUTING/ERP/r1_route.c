@@ -173,6 +173,7 @@ int main() {
   char net_addr[256];
   char msgtype[10];
   sock0 = socket(AF_INET, SOCK_STREAM, 0);
+  int fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
   setsockopt(sock0, SOL_SOCKET, SO_REUSEADDR, 
              &option, sizeof(option));
   
@@ -208,10 +209,9 @@ int main() {
     printf("type =  %s, path =[%s], network = {%s/%d} \n", 
 	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
 
-    int fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 18, false);
-   close(fd);
- }
+    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 18, true);
+    }
+    close(fd);
 
 return 0;
 

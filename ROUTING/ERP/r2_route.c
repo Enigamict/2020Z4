@@ -207,7 +207,7 @@ int main()
 	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
   
     int fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
-    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 17, false);	
+    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 17, true);	
   close(fd);
   }
 
