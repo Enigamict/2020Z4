@@ -1,7 +1,11 @@
 {
   "router-id": "1.1.1.1",
   "neighbors": [ 
-    { "address": "10.255.1.2", "local_address": "10.255.1.1" }
+    {
+      "address": "10.255.1.2", 
+      "local_address": "10.255.1.1", 
+      "ifname": "R1_net0"
+    }
   ],
   "networks": [
     { "prefix": "10.1.0.0/24" },

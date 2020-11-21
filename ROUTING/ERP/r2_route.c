@@ -65,7 +65,8 @@ int main(int argc, char** argv)
 
     strcpy(adr_str,inet_ntoa(msghdr->nexthop));
     strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
-    uint32_t index = if_nametoindex("R2_net0");
+    const char *name = cfg.neighbors[0]->ifname;
+    uint32_t index = if_nametoindex(name);
     printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
 	   msgtype, adr_str, net_addr, msghdr->networks[i].length, index);
     

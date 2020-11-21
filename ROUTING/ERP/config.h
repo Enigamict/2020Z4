@@ -21,6 +21,7 @@ struct config {
 struct neighbor {
   struct in_addr address;
   struct in_addr local_address;
+  char ifname[256];
 };
 
 struct prefix {
@@ -54,6 +55,7 @@ static inline void print_config(const struct config* cfg)
     inet_ntop(AF_INET, &cfg->neighbors[i]->local_address,
               addr_str, sizeof(addr_str));
     printf("neighbor[%ld]local_address: %s\n", i, addr_str);
+    printf("neighbor[%ld]if_name: %s\n", i, cfg->neighbors[i]->ifname);
   }
   for (size_t i = 0; i < MAX_NETWORK; i++){
     if (!cfg->networks[i])
@@ -102,6 +104,10 @@ config_parse(struct config* cfg, char* json)
           jo = json_object_get(json_neiaddr, "local_address"); 
 	  inet_pton(AF_INET, json_string_value(jo),
 	            &cfg->neighbors[index]->local_address);
+          
+          jo = json_object_get(json_neiaddr, "ifname"); 
+	  strcpy(cfg->neighbors[index]->ifname, 
+                 json_string_value(jo));
           //inet_ntop(AF_INET, &cfg->neighbors[index]->address, addr_str, 256);
           //printf("neighbor[%d]: %s\n", index, addr_str);
   }
