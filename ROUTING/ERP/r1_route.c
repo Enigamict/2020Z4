@@ -12,17 +12,6 @@
 #include <stdbool.h>
 #include "netlink.h"
 #include "config.h"
-#define MAX_HOP 32
-#define MSG_TYPE_UNSPEC 0
-#define MSG_TYPE_UPDATE 1
-#define MSG_TYPE_WITHDRAW 2
-
-struct message {
-  uint32_t type; // MSG_TYPE_XX
-  struct in_addr path[MAX_HOP];
-  struct prefix networks[MAX_NETWORK];
-};
-
 
 static void parse(const void* ptr, size_t len)
 {
@@ -131,6 +120,15 @@ int main(int argc, char** argv) {
 
   int len = sizeof(client);
   sock = accept(sock0, (struct sockaddr *)&client, &len);
+  
+  for (size_t i = 0; i < MAX_NETWORK; i++){
+    if (!cfg.networks[i])
+      continue;
+    msg.networks[i] = cfg.networks[i]->prefix;
+  }
+  msg.nexthop = cfg.neighbors[0]->address;
+  // for (size_t i = 0; i < MAX_; i++){
+  //  msg.path[i] = cfg.router_id;
 
   msg.type = MSG_TYPE_UPDATE;
 
@@ -144,7 +142,7 @@ int main(int argc, char** argv) {
       return -1;
   }
   struct message *msghdr =  (struct message *)buf;
-  for (i = 0; i < MAX_NETWORK; i++){
+  for (i = 0; i < 2; i++){
 	  if (msghdr->type == MSG_TYPE_UPDATE) {
 		  strcpy(msgtype, "UPDATE");
 	  }

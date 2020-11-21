@@ -8,7 +8,9 @@
 #define MAX_NEIGH 32
 #define MAX_NETWORK 256
 #define MAX_HOP 32
-
+#define MSG_TYPE_UNSPEC 0
+#define MSG_TYPE_UPDATE 1
+#define MSG_TYPE_WITHDRAW 2
 
 struct config {
   struct in_addr router_id;
@@ -18,6 +20,7 @@ struct config {
 
 struct neighbor {
   struct in_addr address;
+  struct in_addr local_address;
 };
 
 struct prefix {
@@ -29,6 +32,12 @@ struct network {
   struct prefix prefix;
 };
 
+struct message {
+  uint32_t type; // MSG_TYPE_XX
+  struct in_addr path[MAX_HOP];
+  struct in_addr nexthop;
+  struct prefix networks[MAX_NETWORK];
+};
 
 static inline void print_config(const struct config* cfg) 
 {
@@ -41,7 +50,10 @@ static inline void print_config(const struct config* cfg)
       continue;
     inet_ntop(AF_INET, &cfg->neighbors[i]->address,
               addr_str, sizeof(addr_str));
-    printf("neighbor[%ld]: %s\n", i, addr_str);
+    printf("neighbor[%ld]address: %s\n", i, addr_str);
+    inet_ntop(AF_INET, &cfg->neighbors[i]->local_address,
+              addr_str, sizeof(addr_str));
+    printf("neighbor[%ld]local_address: %s\n", i, addr_str);
   }
   for (size_t i = 0; i < MAX_NETWORK; i++){
     if (!cfg->networks[i])
@@ -84,12 +96,14 @@ config_parse(struct config* cfg, char* json)
   json_array_foreach(json_nei, index, json_neiaddr) {
 	  cfg->neighbors[index] = (struct neighbor *)malloc(sizeof(
 				  struct neighbor));
-	  inet_pton(AF_INET, json_string_value(
-				  json_object_get(
-					  json_neiaddr, "address")), 
-			  &cfg->neighbors[index]->address);
-	  inet_ntop(AF_INET, &cfg->neighbors[index]->address, addr_str, 256);
-	  //printf("neighbor[%d]: %s\n", index, addr_str);
+          json_t* jo = json_object_get(json_neiaddr, "address"); 
+	  inet_pton(AF_INET, json_string_value(jo),
+	            &cfg->neighbors[index]->address);
+          jo = json_object_get(json_neiaddr, "local_address"); 
+	  inet_pton(AF_INET, json_string_value(jo),
+	            &cfg->neighbors[index]->local_address);
+          //inet_ntop(AF_INET, &cfg->neighbors[index]->address, addr_str, 256);
+          //printf("neighbor[%d]: %s\n", index, addr_str);
   }
 
  /* network */
