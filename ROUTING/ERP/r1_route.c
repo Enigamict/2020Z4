@@ -49,11 +49,13 @@ int main(int argc, char** argv) {
 
   int len = sizeof(client);
   sock = accept(sock0, (struct sockaddr *)&client, &len);
-  
+
+  size_t ii = 0;
   for (size_t i = 0; i < MAX_NETWORK; i++){
     if (!cfg.networks[i])
       continue;
-    msg.networks[i] = cfg.networks[i]->prefix;
+    msg.networks[ii] = cfg.networks[i]->prefix;
+    ii++;
   }
 
   msg.type = MSG_TYPE_UPDATE;
@@ -75,12 +77,13 @@ int main(int argc, char** argv) {
 		  strcpy(msgtype, "UPDATE");
 	  }
 
-	  strcpy(adr_str,inet_ntoa(msghdr->path[0]));
+	  strcpy(adr_str,inet_ntoa(msghdr->nexthop));
 	  strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
           uint32_t index = if_nametoindex("R1_net0");
-	  printf("type =  %s, path =[%s], network = {%s/%d} \n", 
-			  msgtype, adr_str, net_addr, msghdr->networks[i].length);
-
+	  printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
+		  msgtype, adr_str, net_addr, 
+                  msghdr->networks[i].length, 
+                  index);
 	  adddel_route(fd, net_addr,
                        msghdr->networks[i].length,
                        adr_str, index, true);

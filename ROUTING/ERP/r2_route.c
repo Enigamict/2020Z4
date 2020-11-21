@@ -2,6 +2,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <stdio.h>
+#include <net/if.h>
 #include <sys/types.h>
 #include <string.h>
 #include <unistd.h>
@@ -62,20 +63,21 @@ int main(int argc, char** argv)
       strcpy(msgtype, "UPDATE");
     }
 
-    strcpy(adr_str,inet_ntoa(msghdr->path[0]));
+    strcpy(adr_str,inet_ntoa(msghdr->nexthop));
     strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
-    printf("type =  %s, path =[%s], network = {%s/%d} \n", 
-	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
+    uint32_t index = if_nametoindex("R2_net0");
+    printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
+	   msgtype, adr_str, net_addr, msghdr->networks[i].length, index);
     
-    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 17, true);	
+    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, index, true);	
   }
   
-  close(fd);
-
+  size_t ii = 0;
   for (size_t i = 0; i < MAX_NETWORK; i++){
     if (!cfg.networks[i])
       continue;
-    msg.networks[i] = cfg.networks[i]->prefix;
+    msg.networks[ii] = cfg.networks[i]->prefix;
+    ii++;
   }
   
   msg.type = MSG_TYPE_UPDATE;
@@ -88,6 +90,6 @@ int main(int argc, char** argv)
   
    /* socketの終了 */
   close(sock);
-
+  close(fd);
   return 0;
 }
