@@ -30,7 +30,28 @@ struct network {
 };
 
 
+static inline void print_config(const struct config* cfg) 
+{
+  char addr_str[256];
+  inet_ntop(AF_INET, &cfg->router_id, addr_str, sizeof(addr_str));
+  printf("router-id: %s\n", addr_str);
 
+  for (size_t i = 0; i < MAX_NEIGH; i++){
+    if (!cfg->neighbors[i])
+      continue;
+    inet_ntop(AF_INET, &cfg->neighbors[i]->address,
+              addr_str, sizeof(addr_str));
+    printf("neighbor[%ld]: %s\n", i, addr_str);
+  }
+  for (size_t i = 0; i < MAX_NETWORK; i++){
+    if (!cfg->networks[i])
+      continue;
+    inet_ntop(AF_INET, &cfg->networks[i]->prefix.addr,
+              addr_str, sizeof(addr_str));
+    printf("network[%ld]: %s/%d\n", i, addr_str,
+	  cfg->networks[i]->prefix.length);
+  }
+}
 static inline int
 config_parse(struct config* cfg, char* json)
 {
@@ -46,7 +67,7 @@ config_parse(struct config* cfg, char* json)
             read_json_ob, "router-id")), 
             &cfg->router_id);
   inet_ntop(AF_INET, &cfg->router_id, addr_str ,256);
-  printf("router-id: %s\n", addr_str);
+  //printf("router-id: %s\n", addr_str);
   
   /* ここからneighbors  */
 
@@ -58,19 +79,17 @@ config_parse(struct config* cfg, char* json)
     return -1;  
   }
 
-  struct neighbor *ns[MAX_NEIGH];
   int index;
-  
   json_t *json_neiaddr;
   json_array_foreach(json_nei, index, json_neiaddr) {
-           ns[index] = (struct neighbor *)malloc(sizeof(
-                        struct neighbor));
-           inet_pton(AF_INET, json_string_value(
-	             json_object_get(
-	             json_neiaddr, "address")), 
-                     &ns[index]->address);
-    inet_ntop(AF_INET, &ns[index]->address, addr_str, 256);
-    printf("neighbor[%d]: %s\n", index, addr_str);
+	  cfg->neighbors[index] = (struct neighbor *)malloc(sizeof(
+				  struct neighbor));
+	  inet_pton(AF_INET, json_string_value(
+				  json_object_get(
+					  json_neiaddr, "address")), 
+			  &cfg->neighbors[index]->address);
+	  inet_ntop(AF_INET, &cfg->neighbors[index]->address, addr_str, 256);
+	  //printf("neighbor[%d]: %s\n", index, addr_str);
   }
 
  /* network */
@@ -85,32 +104,31 @@ config_parse(struct config* cfg, char* json)
   int lenp;
   int index_pre;
   char prex_addr_len[256];
-  struct prefix *nk[MAX_NETWORK];
   json_t *json_pre;
   char prex_addr[256];
 
   json_array_foreach(json_net, index_pre, json_pre) {
-    strcpy(prex_addr_len, json_string_value(
-           json_object_get(json_pre, "prefix")));
-    nk[index_pre] = (struct prefix *)malloc(sizeof(struct prefix));
-    /* ここの時点で文字列はCIDR表記となっているため
-       表記の部分から後のアドレスを取り出す */ 
-    p = strrchr(prex_addr_len, '/');
+	  strcpy(prex_addr_len, json_string_value(
+				  json_object_get(json_pre, "prefix")));
+	  cfg->networks[index_pre] = (struct network *)malloc(sizeof(struct network));
+	  /* ここの時点で文字列はCIDR表記となっているため
+	     表記の部分から後のアドレスを取り出す */ 
+	  p = strrchr(prex_addr_len, '/');
 
-    /* アドレスから表記の部分まで  */
-    lenp = p - &prex_addr_len[0];
+	  /* アドレスから表記の部分まで  */
+	  lenp = p - &prex_addr_len[0];
 
-    /* prex_addrに元の文字列から表記を取り出したもの文字列を取り出す  */
-    strncpy(prex_addr, prex_addr_len, lenp);
+	  /* prex_addrに元の文字列から表記を取り出したもの文字列を取り出す  */
+	  strncpy(prex_addr, prex_addr_len, lenp);
 
-    /* 終端文字入れ  */
-    prex_addr[lenp] = '\0';
+	  /* 終端文字入れ  */
+	  prex_addr[lenp] = '\0';
 
-    inet_pton(AF_INET, prex_addr, &nk[index_pre]->addr);
-    inet_ntop(AF_INET,  &nk[index_pre]->addr, addr_str, 256);
-    nk[index_pre]->length = atoi(p + 1);
-    printf("network[%d]: %s/%d\n", index_pre, addr_str,
-            nk[index_pre]->length);
+	  inet_pton(AF_INET, prex_addr, &cfg->networks[index_pre]->prefix.addr);
+	  inet_ntop(AF_INET,  &cfg->networks[index_pre]->prefix.addr, addr_str, 256);
+	  cfg->networks[index_pre]->prefix.length = atoi(p + 1);
+	  //printf("network[%d]: %s/%d\n", index_pre, addr_str,
+	  //cfg->networks[index_pre]->prefix.length);
   }
-  
+
 }

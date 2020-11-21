@@ -1,16 +1,9 @@
 {
-  "router-id": "1.1.1.2",
-  "r1_neighbors": [
+  "router-id": "1.1.1.1",
+  "neighbors": [
     { "address": "10.255.1.1" }
   ],
-  "r2_neighbors": [
-    { "address": "10.255.1.2" }
-  ],
-  "r1_networks": [
-    { "prefix": "10.1.0.0/24" },
-    { "prefix": "10.2.0.0/24" }
-  ],
-  "r2_networks": [
+  "networks": [
     { "prefix": "10.3.0.0/24" },
     { "prefix": "10.4.0.0/24" }
   ]
