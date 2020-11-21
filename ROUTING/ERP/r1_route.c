@@ -107,7 +107,6 @@ int main() {
     printf("json configが読み取れません\n");
     return -1;
   }
-
   json_t *json_nei;
   json_nei = json_object_get(
              read_json_ob, "r1_neighbors");
@@ -199,20 +198,22 @@ int main() {
       return -1;
   }
   struct message *msghdr =  (struct message *)buf;
-    for (i = 0; i < MAX_NETWORK; i++){
-    if (msghdr->type == MSG_TYPE_UPDATE) {
-      strcpy(msgtype, "UPDATE");
-    }
-    
-    strcpy(adr_str,inet_ntoa(msghdr->path[0]));
-    strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
-    printf("type =  %s, path =[%s], network = {%s/%d} \n", 
-	   msgtype, adr_str, net_addr, msghdr->networks[i].length);
+  for (i = 0; i < MAX_NETWORK; i++){
+	  if (msghdr->type == MSG_TYPE_UPDATE) {
+		  strcpy(msgtype, "UPDATE");
+	  }
 
-    adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 18, true);
-    }
-    close(fd);
+	  strcpy(adr_str,inet_ntoa(msghdr->path[0]));
+	  strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
+	  printf("type =  %s, path =[%s], network = {%s/%d} \n", 
+			  msgtype, adr_str, net_addr, msghdr->networks[i].length);
 
-return 0;
+	  adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, 18, true);
+
+  }
+  
+  close(fd);
+
+  return 0;
 
 }
