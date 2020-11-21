@@ -71,7 +71,6 @@ int main(int argc, char** argv)
   }
   
   close(fd);
-  msg.type = MSG_TYPE_UPDATE;
 
   for (size_t i = 0; i < MAX_NETWORK; i++){
     if (!cfg.networks[i])
@@ -79,11 +78,9 @@ int main(int argc, char** argv)
     msg.networks[i] = cfg.networks[i]->prefix;
   }
   
-  for (size_t i = 0; i < MAX_NEIGH; i++){
-    if (!cfg.networks[i])
-      continue;
-   //msg.path[i] = cfg.networks[i]->prefix;
-  }
+  msg.type = MSG_TYPE_UPDATE;
+  msg.path[0] = cfg.router_id;
+  msg.nexthop = cfg.neighbors[0]->local_address;
 
 
   sendto(sock, &msg, sizeof(msg),

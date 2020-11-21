@@ -10,3 +10,8 @@ kill:
 	pgrep -f r1_route |sudo xargs kill -9
 check:
 	ps aux | grep topo2 | grep -v grep
+flush_route:
+	ip netns exec R1 ip route del 10.3.0.0/24 || true
+	ip netns exec R1 ip route del 10.4.0.0/24 || true
+	ip netns exec R2 ip route del 10.1.0.0/24 || true
+	ip netns exec R2 ip route del 10.2.0.0/24 || true

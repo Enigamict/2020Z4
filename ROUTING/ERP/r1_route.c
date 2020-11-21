@@ -55,11 +55,10 @@ int main(int argc, char** argv) {
       continue;
     msg.networks[i] = cfg.networks[i]->prefix;
   }
-  msg.nexthop = cfg.neighbors[0]->address;
-  // for (size_t i = 0; i < MAX_; i++){
-  //  msg.path[i] = cfg.router_id;
 
   msg.type = MSG_TYPE_UPDATE;
+  msg.path[0] = cfg.router_id;
+  msg.nexthop = cfg.neighbors[0]->local_address;
 
   sendto(sock, &msg, sizeof(msg),
              0, (struct sockaddr *)&addr, sizeof(addr));
