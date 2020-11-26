@@ -26,9 +26,7 @@ int main(int argc, char** argv) {
   json_error_t error;
   struct sockaddr_in addr;
   struct sockaddr_in client;
-  struct ifreq ifr;
   struct timeval tv;
-  fd_set fds, readfds;
   int option = 1;
   int sock0;
   int sock;
@@ -50,60 +48,37 @@ int main(int argc, char** argv) {
   bind(sock0, (struct sockaddr*) &addr, sizeof(addr));
 
   listen(sock0, 2);
-  tv.tv_sec = 10;
+  tv.tv_sec = 5;
   tv.tv_usec = 0;
-  FD_ZERO(&readfds);
-  FD_SET(sock0, &readfds);
-  int count;
-  while(count < 2) {
+  setsockopt(sock0,SOL_SOCKET,
+  SO_RCVTIMEO,&tv,sizeof(tv));
+  while(1) {
     int len = sizeof(client);
     sock = accept(sock0, (struct sockaddr *)&client, &len);
-    printf("%s", inet_ntoa(client.sin_addr));
-    size_t ii = 0;
-    for (size_t i = 0; i < MAX_NETWORK; i++){
-      if (!cfg.networks[i])
-	continue;
-      msg.networks[ii] = cfg.networks[i]->prefix;
-      ii++;
-    }
-
-    msg.type = MSG_TYPE_UPDATE;
-    msg.path[0] = cfg.router_id;
-    msg.nexthop = cfg.neighbors[0]->local_address;
-
-    sendto(sock, &msg, sizeof(msg),
-	0, (struct sockaddr *)&addr, sizeof(addr));
-
     memset(buf, 0, sizeof(buf));
     n = recv(sock, buf, sizeof(buf), 0);
     if (n < 1) {
-      printf("okasii");
+      printf("timeout \n");
       return -1;
     }
     struct message *msghdr =  (struct message *)buf;
     for (i = 0; i < 2; i++){
       if (msghdr->type == MSG_TYPE_UPDATE) {
 	strcpy(msgtype, "UPDATE");
-      }
-      if (inet_ntoa(client.sin_addr) == )
-
-      strcpy(adr_str,inet_ntoa(msghdr->nexthop));
-      strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
-      const char *name = cfg.neighbors[0]->ifname;
-      uint32_t index = if_nametoindex(name);
-      printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
-	  msgtype, adr_str, net_addr, 
-	  msghdr->networks[i].length, 
-	  index);
-      // adddel_route(fd, net_addr,
-      //	msghdr->networks[i].length,
-      //	adr_str, index, true);
-
-
-    }
-    count++;
+        }
+	strcpy(adr_str,inet_ntoa(msghdr->nexthop));
+	strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
+	const char *name = cfg.neighbors[i]->ifname;
+	uint32_t index = if_nametoindex(name);
+	printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
+	    msgtype, adr_str, net_addr, 
+	    msghdr->networks[i].length, 
+	    index);
+	 adddel_route(fd, net_addr,
+		msghdr->networks[i].length,
+		adr_str, d, true);     
   }
-
+  }
   close(fd);
 
   return 0;

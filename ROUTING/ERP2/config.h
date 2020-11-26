@@ -51,11 +51,12 @@ static inline void print_config(const struct config* cfg)
       continue;
     inet_ntop(AF_INET, &cfg->neighbors[i]->address,
               addr_str, sizeof(addr_str));
-    printf("neighbor[%ld]address: %s\n", i, addr_str);
+    printf("neighbor[%ld]address: %s\n", i ,addr_str);
     inet_ntop(AF_INET, &cfg->neighbors[i]->local_address,
               addr_str, sizeof(addr_str));
     printf("neighbor[%ld]local_address: %s\n", i, addr_str);
     printf("neighbor[%ld]if_name: %s\n", i, cfg->neighbors[i]->ifname);
+    printf("%ld \n", i);
   }
   for (size_t i = 0; i < MAX_NETWORK; i++){
     if (!cfg->networks[i])
@@ -101,15 +102,16 @@ config_parse(struct config* cfg, char* json)
           json_t* jo = json_object_get(json_neiaddr, "address"); 
 	  inet_pton(AF_INET, json_string_value(jo),
 	            &cfg->neighbors[index]->address);
-          jo = json_object_get(json_neiaddr, "local_address"); 
+          jo = json_object_get(json_neiaddr, "local_address");
+
 	  inet_pton(AF_INET, json_string_value(jo),
 	            &cfg->neighbors[index]->local_address);
           
           jo = json_object_get(json_neiaddr, "ifname"); 
 	  strcpy(cfg->neighbors[index]->ifname, 
                  json_string_value(jo));
-          //inet_ntop(AF_INET, &cfg->neighbors[index]->address, addr_str, 256);
-          //printf("neighbor[%d]: %s\n", index, addr_str);
+          //inet_ntop(AF_INET, &cfg->neighbors[index]->local_address, addr_str, 256);
+          //printf("aaneighbor[%d]: %s\n", index, addr_str);
   }
 
  /* network */

@@ -51,10 +51,26 @@ int main(int argc, char** argv)
 
   /* サーバに接続 */
   connect(sock, (struct sockaddr *)&server, sizeof(server));
+  size_t ii = 0;
+  for (size_t i = 0; i < MAX_NETWORK; i++){
+    if (!cfg.networks[i])
+      continue;
+    msg.networks[ii] = cfg.networks[i]->prefix;
+    ii++;
+  }
+
+  msg.type = MSG_TYPE_UPDATE;
+  msg.path[0] = cfg.router_id;
+  msg.nexthop = cfg.neighbors[0]->local_address;
+
+
+  sendto(sock, &msg, sizeof(msg),
+      0, (struct sockaddr *)&addr, sizeof(addr));
+
   memset(buf, 0, sizeof(buf));
   n = recv(sock, buf, sizeof(buf), 0);
   if (n < 1) {
-    printf("okasii");
+    printf("timeout \n");
     return -1;
   }
   struct message *msghdr =  (struct message *)buf;
@@ -72,23 +88,6 @@ int main(int argc, char** argv)
 
     //adddel_route(fd, net_addr, msghdr->networks[i].length, adr_str, index, true);	
   }
-
-  size_t ii = 0;
-  for (size_t i = 0; i < MAX_NETWORK; i++){
-    if (!cfg.networks[i])
-      continue;
-    msg.networks[ii] = cfg.networks[i]->prefix;
-    ii++;
-  }
-
-  msg.type = MSG_TYPE_UPDATE;
-  msg.path[0] = cfg.router_id;
-  msg.nexthop = cfg.neighbors[0]->local_address;
-
-
-  sendto(sock, &msg, sizeof(msg),
-      0, (struct sockaddr *)&addr, sizeof(addr));
-
   /* socketの終了 */
   close(sock);
   close(fd);

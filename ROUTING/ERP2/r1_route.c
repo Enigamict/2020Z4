@@ -70,7 +70,7 @@ int main(int argc, char** argv)
   sizeof(buf);
   n = recv(sock, buf, sizeof(buf), 0);
   if (n < 1) {
-    printf("okasii");
+    printf("timeout \n");
     return -1;
   }
   struct message *msghdr =  (struct message *)buf;
