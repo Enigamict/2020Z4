@@ -32,7 +32,6 @@ int main(int argc, char** argv) {
   int sock;
   int i;
   int n;
-  int d;
   char buf[10000];
   char adr_str[256];
   char net_addr[256];
@@ -48,10 +47,11 @@ int main(int argc, char** argv) {
   bind(sock0, (struct sockaddr*) &addr, sizeof(addr));
 
   listen(sock0, 2);
-  tv.tv_sec = 5;
-  tv.tv_usec = 0;
-  setsockopt(sock0,SOL_SOCKET,
-  SO_RCVTIMEO,&tv,sizeof(tv));
+  //tv.tv_sec = 5;
+  //tv.tv_usec = 0;
+  //setsockopt(sock0,SOL_SOCKET,
+  //SO_RCVTIMEO,&tv,sizeof(tv));
+  int count;
   while(1) {
     int len = sizeof(client);
     sock = accept(sock0, (struct sockaddr *)&client, &len);
@@ -65,19 +65,19 @@ int main(int argc, char** argv) {
     for (i = 0; i < 2; i++){
       if (msghdr->type == MSG_TYPE_UPDATE) {
 	strcpy(msgtype, "UPDATE");
-        }
-	strcpy(adr_str,inet_ntoa(msghdr->nexthop));
-	strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
-	const char *name = cfg.neighbors[i]->ifname;
-	uint32_t index = if_nametoindex(name);
-	printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
-	    msgtype, adr_str, net_addr, 
-	    msghdr->networks[i].length, 
-	    index);
-	 adddel_route(fd, net_addr,
-		msghdr->networks[i].length,
-		adr_str, d, true);     
-  }
+      }
+      strcpy(adr_str,inet_ntoa(msghdr->nexthop));
+      strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
+      const char *name = cfg.neighbors[1]->ifname;
+      uint32_t index = if_nametoindex(name);
+      printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
+	  msgtype, adr_str, net_addr, 
+	  msghdr->networks[i].length, 
+	  index);
+      adddel_route(fd, net_addr,
+	  msghdr->networks[i].length,
+	  adr_str, 0, true);
+    }
   }
   close(fd);
 
