@@ -6,7 +6,6 @@
      {"address": "10.255.1.2","local_address":"10.255.1.4", "ifname": "R3_net1"}
   ],
  "networks": [
-     { "prefix": "0.0.0.0/00" }
  ]
 
 }
