@@ -39,6 +39,7 @@ int main(int argc, char** argv)
   char buf[10000];
   char adr_str[256];
   char net_addr[256];
+  char nei_addr[256];
   char msgtype[10];
    /* ソケットの作成 */
   sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,7 +47,8 @@ int main(int argc, char** argv)
    /* 接続先指定用構造体の準備 */
   server.sin_family = AF_INET;
   server.sin_port = htons(12345);
-  server.sin_addr.s_addr = inet_addr("10.255.1.3");
+  strcpy(nei_addr,inet_ntoa(cfg.neighbors[0]->address));
+  server.sin_addr.s_addr = inet_addr(nei_addr);
 
 
    /* サーバに接続 */

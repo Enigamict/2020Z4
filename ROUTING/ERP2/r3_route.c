@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
       }
       strcpy(adr_str,inet_ntoa(msghdr->nexthop));
       strcpy(net_addr, inet_ntoa(msghdr->networks[i].addr));
-      const char *name = cfg.neighbors[1]->ifname;
+      const char *name = cfg.neighbors[0]->ifname;
       uint32_t index = if_nametoindex(name);
       printf("type =  %s, path =[%s], network = {%s/%d} %u \n", 
 	  msgtype, adr_str, net_addr, 
@@ -77,10 +77,22 @@ int main(int argc, char** argv) {
       adddel_route(fd, net_addr,
 	  msghdr->networks[i].length,
 	  adr_str, 0, true);
-    }
-  }
-  close(fd);
+     }  
 
+    //size_t ii = 0;
+    //for (size_t i = 0; i < 2; i++){
+    //msg.networks[ii] = msghdr->networks[i];
+    //ii++;
+    //}
+
+    //rmsg.nexthop = cfg.neighbors[0]->local_address;
+
+
+    //sendto(sock, &rmsg, sizeof(rmsg),
+    //  0, (struct sockaddr *)&addr, sizeof(addr));
+  
+  close(fd);
+}
   return 0;
 
 }

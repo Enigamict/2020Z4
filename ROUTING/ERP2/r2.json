@@ -2,7 +2,7 @@
   "router-id": "2.2.2.2",
   "neighbors": [
     {
-      "address": "10.255.1.1", 
+      "address": "10.255.2.3", 
       "local_address": "10.255.2.2", 
       "ifname": "R2_net0"
     }
